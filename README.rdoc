@@ -1,0 +1,37 @@
+= bayeux.rack
+
+Bayeux (COMET or long-polling) protocol server as a Sinatra application.
+Light weight and high scalability are achieved by using the
+asynchronous Rack extensions added to Thin by async_sinatra.
+
+Because it uses async_sinatra, which uses EventMachine, it won't work in Passenger.
+Sorry about that, but Apache doesn't really like long-polling anyhow. Use Thin.
+
+== Usage
+
+See http://github.com/cjheath/jquery.comet
+for an example of usage and for a COMET client in Javascript.
+
+== Installing
+
+  gem install bayeux-rack
+
+== License
+
+The jquery.comet.js and chat_server are subject to the MIT license.
+
+== Developing
+
+Fork on github https://github.com/cjheath/bayeux-rack or just clone to play:
+
+  git clone git://github.com/cjheath/bayeux-rack.git
+
+Patches welcome! Fork and send a pull request. Please follow coding conventions already in use.
+Please use jslint if you can. There are currently no warnings, please keep it that way.
+
+== Status
+
+Current release has a happy path (working ok). Significant drawbacks to be fixed are:
+
+* Server-side timeout of long-polls to avoid possible loss of sent messages
+* Detecting multiple connections (tabs?) from the same browser, to fall back to callback polling.
