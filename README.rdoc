@@ -12,6 +12,26 @@ Sorry about that, but Apache doesn't really like long-polling anyhow. Use Thin.
 See http://github.com/cjheath/jquery.comet
 for an example of usage and for a COMET client in Javascript.
 
+  class MyServer < Bayeux
+    configure do
+      set :public, File.dirname(__FILE__)+'/../chat_demo'
+    end
+
+    def deliver message
+      case channel_name = message['channel']
+      when '/my/interesting/channel'
+	data = message['data']
+	if data == 'ping'
+	  publish :channel => channel_name, :data => 'pong'
+	else
+	  super
+	end
+      else
+	super
+      end
+    end
+  end
+
 == Installing
 
   gem install bayeux-rack
