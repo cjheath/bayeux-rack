@@ -14,7 +14,8 @@ for an example of usage and for a COMET client in Javascript.
 
   class MyServer < Bayeux
     configure do
-      set :public, File.dirname(__FILE__)+'/../chat_demo'
+      # The default :public is inside the Bayeux gem
+      set :public, File.dirname(__FILE__)
     end
 
     def deliver message
@@ -38,7 +39,7 @@ for an example of usage and for a COMET client in Javascript.
 
 == License
 
-The jquery.comet.js and chat_server are subject to the MIT license.
+The MIT license.
 
 == Developing
 
