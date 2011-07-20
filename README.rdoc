@@ -7,6 +7,9 @@ asynchronous Rack extensions added to Thin by async_sinatra.
 Because it uses async_sinatra, which uses EventMachine, it won't work in Passenger.
 Sorry about that, but Apache doesn't really like long-polling anyhow. Use Thin.
 
+You can see a video presentation of this code here:
+http://www.youtube.com/watch?v=Bhj9QOfNd4c
+
 == Usage
 
 See http://github.com/cjheath/jquery.comet
