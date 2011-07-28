@@ -14,7 +14,7 @@ require 'eventmachine'
 # implementing the COMET protocol.
 class Bayeux < Sinatra::Base
   # The Gem version of this implementation
-  VERSION = "0.6.0"
+  VERSION = "0.6.1"
   register Sinatra::Async
 
   # A connected client
