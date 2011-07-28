@@ -86,8 +86,11 @@ class Bayeux < Sinatra::Base
 
   # ClientIds should be strong random numbers containing at least 128 bits of entropy. These aren't!
   def next_client_id
-    @@next_client_id ||= 0
-    (@@next_client_id += 1).to_s
+    begin
+      id = (rand*1_000_000_000).to_i
+    end until !clients[id]
+    trace "New client recieves ID #{id}"
+    id
   end
 
   # Send a message (a Hash) to a channel.
@@ -243,6 +246,7 @@ class Bayeux < Sinatra::Base
     if !queued.empty? || client.subscription
       if client.subscription
         # If the client opened a second long-poll, finish that one and this:
+        trace "Another long-poll seems to be already active for #{clientId}; close it!"
         client.channel.push true    # Complete the outstanding poll
       end
       client.queue << connect_response
@@ -253,7 +257,9 @@ class Bayeux < Sinatra::Base
     client.subscription =
       client.channel.subscribe do |msg|
         queued = client.queue
-        trace "Client #{clientId} awoke but found an empty queue" if queued.empty?
+        if queued.empty?
+          trace "Client #{clientId} awoke but found an empty queue"
+        end
         client.queue << connect_response
         client.flush(self)
       end
@@ -309,22 +315,30 @@ class Bayeux < Sinatra::Base
 
   # Parse a message (or array of messages) from an HTTP request and deliver the messages
   def receive message_json
-    message = JSON.parse(message_json)
+    message = [JSON.parse(message_json)].flatten
 
-    # The message here should either be a connect message (long-poll) or messages being sent.
-    # For a long-poll we return a reponse immediately only if messages are queued for this client.
-    # For a send-message, we always return a response immediately, even if it's just an acknowledgement.
-    @is_connect = false
-    response = deliver_all(message)
-    return if @is_connect
-
-    if clientId = params['clientId'] and client = clients[clientId]
-      client.queue += response
-      client.flush if params['jsonp'] || !client.queue.empty?
+    clientId = message[0]['clientId']
+    channel_name = message[0]['channel']
+    if (channel_name == '/meta/handshake' && message.size == 1)
+      respond(deliver(message[0]))
     else
-      # No client so no queue. Respond immediately if we can, else long-poll
-      respond(response) unless response.empty?
+      client = clients[clientId]
+      if (!client)
+        respond([{:advice => {:reconnect => :handshake}}])
+      else
+        # The message here should either be a connect message (long-poll) or messages being sent.
+        # For a long-poll we return a reponse immediately only if messages are queued for this client.
+        # For a send-message, we always return a response immediately, even if it's just an acknowledgement.
+        @is_connect = false
+        response = deliver_all(message)
+        if @is_connect   # A long poll
+          return
+        end
+        client.queue += response
+        client.flush if params['jsonp'] || !client.queue.empty?
+      end
     end
+
   rescue => e
     respond([])
   end
