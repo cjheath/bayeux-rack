@@ -16,7 +16,7 @@ Light weight and high scalability are achieved by using the
 asynchronous Rack extensions added to Thin by async_sinatra.}
   gem.email = %w[clifford.heath@gmail.com]
   gem.authors = ["Clifford Heath"]
-  gem.add_runtime_dependency 'json', '>= 1.5.1'
+  gem.add_runtime_dependency 'json', '>= 1.4.6'
   gem.add_runtime_dependency 'async_sinatra', '> 0.1'
   gem.add_runtime_dependency 'eventmachine', '>= 0.12'
   gem.add_runtime_dependency 'thin', '>= 1.2'
